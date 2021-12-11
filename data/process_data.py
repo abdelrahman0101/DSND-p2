@@ -27,6 +27,7 @@ def clean_data(df):
         # remove classes with no samples in the dataset
         if categories[column].sum() == 0:
             categories = categories.drop([column], axis=1);
+            category_colnames = category_colnames[category_colnames != column]
     df = df.drop(['categories'], axis=1)
     # concatenate the original dataframe with the new `categories` dataframe
     df = pd.concat([df, categories], axis=1)
