@@ -7,7 +7,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Heatmap
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -39,37 +39,104 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
-    
+    category_counts = df.drop(['id', 'genre', 'message', 'original'], axis=1).sum(axis=0)
+    category_names = list(category_counts.index)
+
+    correlations = df[category_names].corr().values.tolist();
+    for i in range(len(correlations)):
+        correlations[i][i] = None;
+
+    # Plotting the entire correlation matrix is a lot of details in a single graph, so we plot a single category
+    death_corr = correlations[category_names.index('death')]
+    del death_corr[category_names.index('death')] # no need to show a redundant correlation
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=category_names,
+                    y=category_counts
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': {
+                    'text': "Number of messages in each category",
+                    'font': {
+                        'color': 'grey',
+                        'size': 24
+                    }
+                },
                 'yaxis': {
-                    'title': "Count"
+                    'title': {
+                        'text': "Count",
+                        'font': {
+                            'color': 'grey',
+                            'size': 18
+                        }
+                    },
                 },
                 'xaxis': {
-                    'title': "Genre"
-                }
+                    'title': {
+                        'text': "Category",
+                        'font': {
+                            'color': 'grey',
+                            'size': 18
+                        }
+                    },
+                    'tickangle': 45
+                },
+                'margin': {
+                    'b': 130,
+                },
+                'height': 600,
+            }
+        },
+        {
+            'data': [
+                Bar(x=[c for c in category_names if c != 'death'], y=death_corr)
+            ],
+            'layout': {
+                'title': {
+                    'text': "Correlations of 'Death' with other categories",
+                    'font': {
+                        'color': 'grey',
+                        'size': 24
+                    }
+                },
+                'yaxis': {
+                    'title': {
+                        'text': "Correlation",
+                        'font': {
+                            'color': 'grey',
+                            'size': 18
+                        }
+                    },
+                },
+                'xaxis': {
+                    'title': {
+                        'text': "Category",
+                        'font': {
+                            'color': 'grey',
+                            'size': 18
+                        }
+                    },
+                    'tickangle': 45
+                },
+                'margin': {
+                    't': 150,
+                    'b': 130
+                },
+                'height': 500,
             }
         }
     ]
-    
+
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    
+
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
@@ -78,7 +145,7 @@ def index():
 @app.route('/go')
 def go():
     # save user input in query
-    query = request.args.get('query', '') 
+    query = request.args.get('query', '')
 
     # use model to predict classification for query
     classification_labels = model.predict([query])[0]
@@ -93,7 +160,7 @@ def go():
 
 
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    app.run(host='localhost', port=3001, debug=True)
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import re
-from time import process_time
+from time import time
 import pickle
 
 lemmatizer = WordNetLemmatizer()
@@ -83,9 +83,9 @@ def main():
         model = build_model()
         
         print('Training model...')
-        t_start = process_time()
+        t_start = time()
         model.fit(X_train, Y_train)
-        t_end = process_time()
+        t_end = time()
         print("Training time: %02d:%02.2d" % ((t_end-t_start)/60, (t_end-t_start)%60));
         
         print('Evaluating model...')
