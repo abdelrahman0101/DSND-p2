@@ -15,6 +15,7 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
+    """Tokenize the specified text and return a list of clean tokens"""
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -37,7 +38,9 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
-    
+    """
+    The app's homepage
+    """
     # extract data needed for visuals
     category_counts = df.drop(['id', 'genre', 'message', 'original'], axis=1).sum(axis=0)
     category_names = list(category_counts.index)
@@ -125,7 +128,7 @@ def index():
                     'tickangle': 45
                 },
                 'margin': {
-                    't': 150,
+                    't': 170,
                     'b': 130
                 },
                 'height': 500,
@@ -144,6 +147,9 @@ def index():
 # web page that handles user query and displays model results
 @app.route('/go')
 def go():
+    """
+    process user query and display classification results
+    """
     # save user input in query
     query = request.args.get('query', '')
 

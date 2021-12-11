@@ -23,6 +23,10 @@ import pickle
 lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
+    """
+    loads the cleaned dataset from the specified Sqlite database file and
+    returns the set of training features X, their corresponding target values Y, and the set of category labels.
+    """
     nltk.download(['punkt', 'wordnet', 'stopwords'])
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', engine)
@@ -31,7 +35,14 @@ def load_data(database_filepath):
     labels = list(Y.columns)
     return X, Y, labels
 
+
 def tokenize(text):
+    """
+    Takes a raw message text and tokenizes it into a list of alphanumerical tokens
+    :param text: The raw input message text
+    :return: a list of tokens after after lemmatization and removal of punctuations and stop words.
+    """
+    load_data()
     text = text.lower()
     text = re.sub(r"[^a-zA-Z0-9]", " ", text)
     tokens = word_tokenize(text)
@@ -40,6 +51,11 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Builds a multioutput message classification model using Sklearn's pipeline
+    and tuned with grid-search and cross-validation
+    :return: multioutput text classification model
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -53,6 +69,13 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Prints a detailed classification report on the predictions of the specified classification model.
+    :param model: A multioutput text classifcation model.
+    :param X_test: Classification features if the test set.
+    :param Y_test: The expected target values of the test set.
+    :param category_names: A list of human-readable category names to use in the classification report
+    """
     pred = model.predict(X_test)
     f1_scores = []
     acc_scores = []
@@ -69,10 +92,19 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Exports the specified model to a local file to be used later at runtime
+    :param model: classification model
+    :param model_filepath: path and name if the exported file
+    """
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
+    """
+    The is the script entry point. It parses command line arguments and calls other functions to build, train,
+    and save the classification model.
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))

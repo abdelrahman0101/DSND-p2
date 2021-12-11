@@ -5,6 +5,12 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Loads the messages and categories from external csv files into a joint dataframe
+    :param messages_filepath: messages csv file path
+    :param categories_filepath: categories csv file path
+    :return:
+    """
     messages_df = pd.read_csv(messages_filepath)
     categories_df = pd.read_csv(categories_filepath)
     df = messages_df.join(categories_df.set_index('id'), on='id', how='inner')
@@ -12,6 +18,11 @@ def load_data(messages_filepath, categories_filepath):
     
 
 def clean_data(df):
+    """
+    cleans the raw data before it's saved in a database
+    :param df: dataframe of raw data
+    :return: cleaned dataframe
+    """
     # create a dataframe of the 36 individual category columns
     categories = df.categories.str.split(';', expand=True)
     # use the first row to extract a list of new column names for categories.
@@ -39,11 +50,21 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Saves the specified dataframe into the specified sqlite database file
+    :param df: cleaned dataframe
+    :param database_filename: sqlite database file to save the data into
+    :return:
+    """
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('messages', engine, index=False)
 
 
 def main():
+    """
+    Script entry point. Parses command line arguments and calls other functions to load data, clean them,
+    and store them in an Sqlite database file.
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
