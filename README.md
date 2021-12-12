@@ -1,5 +1,14 @@
 # Disaster Response Pipeline Project
-This is a web app backed with a machine learning model to classify a textual message into one or more disaster categories.
+This is a web app backed with a machine learning model to classify a textual message into one or more disaster event categories.
+
+
+### Motivation
+This project is a part of Udacity's Data Scientist Nanodegree program. 
+The main idea is to create a web app where an emergency worker can input a new message and get classification results in several categories of disaster events. 
+Categorizing a message event is a first step of sending it to an appropriate disaster relief agency.
+
+The web app also displays visualizations of the data stored in the associated dataset.
+
 
 ### Main dependencies:
 * Pandas
@@ -36,3 +45,6 @@ This is a web app backed with a machine learning model to classify a textual mes
     `python run.py`
 
 3. Go to http://localhost:3001/
+
+### Acknowledgement
+This project uses a dataset provided by [Figure-eight](https://www.figure-eight.com/). This dataset contains real messages that were sent during disaster events.

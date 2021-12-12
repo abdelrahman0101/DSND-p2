@@ -42,7 +42,6 @@ def tokenize(text):
     :param text: The raw input message text
     :return: a list of tokens after after lemmatization and removal of punctuations and stop words.
     """
-    load_data()
     text = text.lower()
     text = re.sub(r"[^a-zA-Z0-9]", " ", text)
     tokens = word_tokenize(text)
